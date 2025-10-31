@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import API_URL from '../config/api';
 import './Profile.css';
 
 const Profile = () => {
@@ -9,6 +10,8 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('personal');
+
+
   const [formData, setFormData] = useState({
     email: '',
     firstName: '',
@@ -17,28 +20,28 @@ const Profile = () => {
     nickname: '',
     gender: '',
   });
-  
+
   const [addressData, setAddressData] = useState({
     address: '',
     district: '',
-    amphoe: '', // เพิ่ม
+    amphoe: '',
     province: '',
     postalCode: ''
   });
+
   const [provinceSearch, setProvinceSearch] = useState('');
   const [showProvinceDropdown, setShowProvinceDropdown] = useState(false);
-  const [postalCodeError, setPostalCodeError] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [orders, setOrders] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const hasToken = !!localStorage.getItem('token');
 
-  // ข้อมูลจังหวัดทั้ง 77 จังหวัดของประเทศไทย
+  // จังหวัด 77 จังหวัด
   const provinces = [
     'กรุงเทพมหานคร', 'กระบี่', 'กาญจนบุรี', 'กาฬสินธุ์', 'กำแพงเพชร', 'ขอนแก่น', 'จันทบุรี', 'ฉะเชิงเทรา',
     'ชลบุรี', 'ชัยนาท', 'ชัยภูมิ', 'ชุมพร', 'เชียงราย', 'เชียงใหม่', 'ตรัง', 'ตราด', 'ตาก', 'นครนายก',
     'นครปฐม', 'นครพนม', 'นครราชสีมา', 'นครศรีธรรมราช', 'นครสวรรค์', 'นนทบุรี', 'นราธิวาส', 'น่าน',
-    'นางรอง', 'บึงกาฬ', 'บุรีรัมย์', 'ปทุมธานี', 'ประจวบคีรีขันธ์', 'ปราจีนบุรี', 'ปัตตานี', 'พระนครศรีอยุธยา',
+    'บึงกาฬ', 'บุรีรัมย์', 'ปทุมธานี', 'ประจวบคีรีขันธ์', 'ปราจีนบุรี', 'ปัตตานี', 'พระนครศรีอยุธยา',
     'พะเยา', 'พังงา', 'พัทลุง', 'พิจิตร', 'พิษณุโลก', 'เพชรบุรี', 'เพชรบูรณ์', 'แพร่', 'ภูเก็ต', 'มหาสารคาม',
     'มุกดาหาร', 'แม่ฮ่องสอน', 'ยะลา', 'ยโสธร', 'ร้อยเอ็ด', 'ระนอง', 'ระยอง', 'ราชบุรี', 'ลพบุรี', 'ลำปาง',
     'ลำพูน', 'เลย', 'ศรีสะเกษ', 'สกลนคร', 'สงขลา', 'สตูล', 'สมุทรปราการ', 'สมุทรสงคราม', 'สมุทรสาคร',
@@ -53,7 +56,6 @@ const Profile = () => {
 
   useEffect(() => {
     if (!hasToken) {
-      // แสดงข้อมูล mock ทันทีเมื่อไม่มี token
       const mockUser = {
         id: 1,
         name: 'ก้องภพ สัตบุษ',
@@ -86,14 +88,15 @@ const Profile = () => {
       setLoading(false);
       return;
     }
+
     const fetchUser = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:5050/api/auth/me', {
+  const response = await axios.get(`${API_URL}/api/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
-          timeout: 3000 // ตั้ง timeout 3 วินาที
+          timeout: 3000
         });
-        
+
         if (response.data) {
           setUser(response.data);
           const nameParts = (response.data.name || '').split(' ');
@@ -112,14 +115,12 @@ const Profile = () => {
             province: response.data.province || '',
             postalCode: response.data.postalCode || ''
           });
-          // Set provinceSearch to show the current province in the input field
           setProvinceSearch(response.data.province || '');
         } else {
           setUser(null);
         }
       } catch (error) {
         console.error('Error fetching user:', error);
-        // แสดงข้อมูล mock เมื่อไม่สามารถเชื่อมต่อ backend ได้
         const mockUser = {
           id: 1,
           name: 'nattapat Klu',
@@ -157,56 +158,34 @@ const Profile = () => {
     fetchUser();
   }, [hasToken]);
 
+  // ฟอร์มข้อมูลส่วนตัว
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
-    // Validation สำหรับเบอร์โทร
+
     if (name === 'phone') {
-      // อนุญาตเฉพาะตัวเลขและจำกัดความยาวไม่เกิน 10 ตัว
       const numericValue = value.replace(/[^0-9]/g, '').slice(0, 10);
-      setFormData({
-        ...formData,
-        [name]: numericValue
-      });
-      
-      // ตรวจสอบความถูกต้อง
-      if (numericValue.length > 0 && numericValue.length !== 10) {
-        setPhoneError('เบอร์โทรศัพท์ต้องมี 10 หลัก');
-      } else {
-        setPhoneError('');
-      }
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value
-      });
+      setFormData(prev => ({ ...prev, phone: numericValue }));
+      if (numericValue.length > 0 && numericValue.length !== 10) setPhoneError('เบอร์โทรศัพท์ต้องมี 10 หลัก');
+      else setPhoneError('');
+      return;
     }
+
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // ฟอร์มที่อยู่
   const handleAddressChange = (e) => {
     const { name, value } = e.target;
-    
-    // Validation สำหรับรหัสไปรษณีย์
+
     if (name === 'postalCode') {
-      // อนุญาตเฉพาะตัวเลขและจำกัดความยาวไม่เกิน 5 ตัว
-      const numericValue = value.replace(/[^0-9]/g, '').slice(0, 5);
-      setAddressData({
-        ...addressData,
-        [name]: numericValue
-      });
-      
-      // ตรวจสอบความถูกต้อง
-      if (numericValue.length > 0 && numericValue.length !== 5) {
-        setPostalCodeError('รหัสไปรษณีย์ต้องมี 5 หลัก');
-      } else {
-        setPostalCodeError('');
-      }
-    } else {
-      setAddressData({
-        ...addressData,
-        [name]: value
-      });
+      // เก็บเฉพาะตัวเลข และจำกัดความยาว 5 หลัก
+      const digitsOnly = value.replace(/\D/g, '').slice(0, 5);
+      setAddressData(prev => ({ ...prev, postalCode: digitsOnly }));
+      return; // ไม่แสดง error ใด ๆ
     }
+
+    // ช่องอื่น ๆ เก็บตามที่พิมพ์ (ตัวอักษร/ตัวเลขได้ปกติ)
+    setAddressData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleProvinceSearch = (e) => {
@@ -215,10 +194,7 @@ const Profile = () => {
   };
 
   const handleProvinceSelect = (province) => {
-    setAddressData({
-      ...addressData,
-      province: province
-    });
+    setAddressData(prev => ({ ...prev, province }));
     setProvinceSearch(province);
     setShowProvinceDropdown(false);
   };
@@ -227,33 +203,26 @@ const Profile = () => {
     province.toLowerCase().includes(provinceSearch.toLowerCase())
   );
 
-  // ปิด dropdown เมื่อคลิกข้างนอก
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (!event.target.closest('.province-dropdown')) {
-        setShowProvinceDropdown(false);
-      }
+      if (!event.target.closest('.province-dropdown')) setShowProvinceDropdown(false);
     };
-
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // ตรวจสอบเบอร์โทรก่อนบันทึก
+
     if (formData.phone && formData.phone.length !== 10) {
       setPhoneError('เบอร์โทรศัพท์ต้องมี 10 หลัก');
       return;
     }
-    
+
     try {
       const token = localStorage.getItem('token');
       if (token) {
-        const response = await axios.put('http://localhost:5050/api/user', {
+  const response = await axios.put(`${API_URL}/api/user`, {
           name: `${formData.firstName} ${formData.lastName}`.trim(),
           email: formData.email,
           phone: formData.phone,
@@ -263,14 +232,11 @@ const Profile = () => {
           district: addressData.district,
           province: addressData.province,
           postalCode: addressData.postalCode
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        
-        // อัปเดต state หลังจากบันทึกสำเร็จ
+        }, { headers: { Authorization: `Bearer ${token}` } });
+
         if (response.data) {
-          setUser(prevUser => ({
-            ...prevUser,
+          setUser(prev => ({
+            ...prev,
             name: response.data.name,
             email: response.data.email,
             phone: response.data.phone,
@@ -278,26 +244,14 @@ const Profile = () => {
             gender: response.data.gender,
             address: response.data.address
           }));
-          
-          // อัปเดต formData เพื่อให้แสดงผลถูกต้อง
-          setFormData({
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            email: formData.email,
-            phone: formData.phone,
-            nickname: formData.nickname,
-            gender: formData.gender
-          });
+          setFormData(prev => ({ ...prev }));
         }
-        
         alert('บันทึกข้อมูลส่วนตัวสำเร็จ');
       } else {
-        // Mock save for demo
         const mockAddress = [addressData.address, addressData.district, addressData.province, addressData.postalCode]
           .filter(Boolean).join(', ');
-        
-        setUser(prevUser => ({
-          ...prevUser,
+        setUser(prev => ({
+          ...prev,
           name: `${formData.firstName} ${formData.lastName}`.trim(),
           email: formData.email,
           phone: formData.phone,
@@ -305,17 +259,7 @@ const Profile = () => {
           gender: formData.gender,
           address: mockAddress
         }));
-        
-        // อัปเดต formData เพื่อให้แสดงผลถูกต้อง
-        setFormData({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phone: formData.phone,
-          nickname: formData.nickname,
-          gender: formData.gender
-        });
-        
+        setFormData(prev => ({ ...prev }));
         alert('บันทึกข้อมูลส่วนตัวสำเร็จ (Demo Mode)');
       }
     } catch (error) {
@@ -326,71 +270,47 @@ const Profile = () => {
   };
 
   const handleSaveAddress = async () => {
-    // ตรวจสอบรหัสไปรษณีย์ก่อนบันทึก
+    // บังคับให้ต้องเป็น 5 หลัก แต่ไม่แสดง error ใต้ช่อง
     if (addressData.postalCode && addressData.postalCode.length !== 5) {
-      setPostalCodeError('รหัสไปรษณีย์ต้องมี 5 หลัก');
+      alert('รหัสไปรษณีย์ต้องมี 5 หลัก');
       return;
     }
-    
+
     try {
       const token = localStorage.getItem('token');
       if (token) {
-        const response = await axios.put('http://localhost:5050/api/user', {
+  const response = await axios.put(`${API_URL}/api/user`, {
           address: addressData.address,
           district: addressData.district,
-          amphoe: addressData.amphoe, // ส่งไป backend
+          amphoe: addressData.amphoe,
           province: addressData.province,
           postalCode: addressData.postalCode
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        
-        // อัปเดต state หลังจากบันทึกสำเร็จ
+        }, { headers: { Authorization: `Bearer ${token}` } });
+
         if (response.data) {
-          setUser(prevUser => ({
-            ...prevUser,
+          setUser(prev => ({
+            ...prev,
             address: response.data.address,
             district: response.data.district,
             amphoe: response.data.amphoe,
             province: response.data.province,
             postalCode: response.data.postalCode
           }));
-          
-          // อัปเดต addressData state เพื่อให้ข้อมูลแสดงในฟอร์ม
-          setAddressData({
-            address: addressData.address,
-            district: addressData.district,
-            amphoe: addressData.amphoe,
-            province: addressData.province,
-            postalCode: addressData.postalCode
-          });
-          // อัปเดต provinceSearch เพื่อให้แสดงจังหวัดที่เลือก
+          setAddressData(prev => ({ ...prev }));
           setProvinceSearch(addressData.province);
         }
-        
         alert('บันทึกที่อยู่สำเร็จ');
       } else {
-        // Mock save for demo
-        setUser(prevUser => ({
-          ...prevUser,
+        setUser(prev => ({
+          ...prev,
           address: addressData.address,
           district: addressData.district,
           amphoe: addressData.amphoe,
           province: addressData.province,
           postalCode: addressData.postalCode
         }));
-        
-        // อัปเดต addressData state สำหรับ demo mode
-        setAddressData({
-          address: addressData.address,
-          district: addressData.district,
-          amphoe: addressData.amphoe,
-          province: addressData.province,
-          postalCode: addressData.postalCode
-        });
-        // อัปเดต provinceSearch เพื่อให้แสดงจังหวัดที่เลือก
+        setAddressData(prev => ({ ...prev }));
         setProvinceSearch(addressData.province);
-        
         alert('บันทึกที่อยู่สำเร็จ (Demo Mode)');
       }
     } catch (error) {
@@ -402,14 +322,13 @@ const Profile = () => {
   const fetchFavorites = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5050/api/favorites', {
+  const response = await axios.get(`${API_URL}/api/favorites`, {
         headers: { Authorization: `Bearer ${token}` },
         timeout: 3000
       });
       setFavorites(response.data);
     } catch (error) {
       console.error('Error fetching favorites:', error);
-      // แสดงข้อมูล mock เมื่อไม่สามารถเชื่อมต่อ backend ได้
       setFavorites([]);
     }
   };
@@ -417,14 +336,13 @@ const Profile = () => {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5050/api/orders', {
+  const response = await axios.get(`${API_URL}/api/orders`, {
         headers: { Authorization: `Bearer ${token}` },
         timeout: 3000
       });
       setOrders(response.data);
     } catch (error) {
       console.error('Error fetching orders:', error);
-      // แสดงข้อมูล mock เมื่อไม่สามารถเชื่อมต่อ backend ได้
       setOrders([]);
     }
   };
@@ -435,7 +353,6 @@ const Profile = () => {
     } else if (activeTab === 'orders') {
       fetchOrders();
     } else if (activeTab === 'personal' || activeTab === 'address') {
-      // โหลดข้อมูลผู้ใช้ใหม่เมื่อเปลี่ยนไปแท็บข้อมูลส่วนตัวหรือที่อยู่
       fetchUserData();
     }
   }, [activeTab]);
@@ -444,11 +361,11 @@ const Profile = () => {
     try {
       const token = localStorage.getItem('token');
       if (token) {
-        const response = await axios.get('http://localhost:5050/api/auth/me', {
+  const response = await axios.get(`${API_URL}/api/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
           timeout: 3000
         });
-        
+
         if (response.data) {
           setUser(response.data);
           const nameParts = (response.data.name || '').split(' ');
@@ -460,8 +377,6 @@ const Profile = () => {
             nickname: response.data.nickname || '',
             gender: response.data.gender || ''
           });
-          
-          // โหลดข้อมูลที่อยู่แยกเป็นฟิลด์
           setAddressData({
             address: response.data.address || '',
             district: response.data.district || '',
@@ -469,7 +384,6 @@ const Profile = () => {
             province: response.data.province || '',
             postalCode: response.data.postalCode || ''
           });
-          // Set provinceSearch to show the current province in the input field
           setProvinceSearch(response.data.province || '');
         }
       }
@@ -532,9 +446,7 @@ const Profile = () => {
                       maxLength="10"
                       className={phoneError ? 'error' : ''}
                     />
-                    {phoneError && (
-                      <div className="error-message">{phoneError}</div>
-                    )}
+                    {phoneError && <div className="error-message">{phoneError}</div>}
                   </div>
                 </div>
                 <div className="form-row">
@@ -665,43 +577,85 @@ const Profile = () => {
                 <div className="form-group">
                   <label>รหัสไปรษณีย์</label>
                   <input
-                    type="tel"
+                    type="text"
                     name="postalCode"
                     value={addressData.postalCode}
                     onChange={handleAddressChange}
                     placeholder="รหัสไปรษณีย์ 5 หลัก"
-                    maxLength="5"
-                    className={postalCodeError ? 'error' : ''}
+                    inputMode="numeric"
+                    pattern="\d{5}"
+                    maxLength={5}
                   />
-                  {postalCodeError && (
-                    <div className="error-message">{postalCodeError}</div>
-                  )}
                 </div>
               </div>
               <div className="form-actions">
-                <button type="button" className="btn-save" onClick={handleSaveAddress}>บันทึกที่อยู่</button>
+                <button type="button" className="btn-save" onClick={handleSaveAddress}>
+                  บันทึกที่อยู่
+                </button>
               </div>
             </form>
           </div>
         );
 
       case 'orders':
+        // ===== Helpers =====
+        const fmtTHB = (n) =>
+          Number(n || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        const fmtDate = (d) => {
+          try {
+            return new Date(d).toLocaleDateString('en-US', {
+              month: 'short', day: '2-digit', year: 'numeric'
+            });
+          } catch {
+            return '-';
+          }
+        };
+
+        const statusClass = (s) => {
+          const k = String(s || 'PENDING').toUpperCase();
+          if (k === 'COMPLETED' || k === 'PAID') return 'is-completed';
+          if (k === 'SHIPPED' || k === 'DELIVERED') return 'is-shipped';
+          if (k === 'CANCELLED') return 'is-cancelled';
+          return 'is-pending';
+        };
+
         return (
           <div className="content-section">
             <h2>คำสั่งซื้อ</h2>
-            <div className="orders-list">
+
+            <div className="orders-table">
+              {/* head */}
+              <div className="orders-head">
+                <div className="col col-order">คำสั่งซื้อ</div>
+                <div className="col col-date">วันที่</div>
+                <div className="col col-status">สถานะ</div>
+                <div className="col col-amount">ยอดรวม</div>
+                <div className="col col-action">จัดการ</div>
+              </div>
+
               {orders.length > 0 ? (
-                orders.map((order, index) => (
-                  <div key={index} className="order-item">
-                    <div className="order-info">
-                      <h4>คำสั่งซื้อ #{order.id}</h4>
-                      <p>วันที่: {new Date(order.createdAt).toLocaleDateString('th-TH')}</p>
-                      <p>สถานะ: {order.status}</p>
-                      <p>ยอดรวม: ฿{order.total}</p>
+                orders.map((order, i) => (
+                  <div key={i} className="orders-row">
+                    <div className="col col-order">
+                      <div className="order-title">Order #{order.id}</div>
+                      {/* ถ้ามีอีเมลผู้สั่ง ซื้อหรือชื่อ เพิ่มบรรทัดนี้ได้ */}
+                      {/* <div className="order-sub">{user?.email}</div> */}
                     </div>
-                    <div className="order-actions">
-                      <button 
-                        className="btn-view-details"
+
+                    <div className="col col-date">{fmtDate(order.createdAt)}</div>
+
+                    <div className="col col-status">
+                      <span className={`status-badge ${statusClass(order.status)}`}>
+                        {String(order.status || 'PENDING')}
+                      </span>
+                    </div>
+
+                    <div className="col col-amount">{order.total > 0 ? `฿${fmtTHB(order.total)}` : 'Free'}</div>
+
+                    <div className="col col-action">
+                      <button
+                        className="link-action"
                         onClick={() => navigate(`/order/${order.id}`)}
                       >
                         ดูรายละเอียด
@@ -710,77 +664,65 @@ const Profile = () => {
                   </div>
                 ))
               ) : (
-                <div className="empty-state">
-                  <p>ยังไม่มีคำสั่งซื้อ</p>
+                <div className="orders-empty">
+                  ยังไม่มีคำสั่งซื้อ
                 </div>
               )}
             </div>
           </div>
         );
 
+
       case 'favorites':
-  // ฟังก์ชันสำหรับดึงรูปภาพจากโฟลเดอร์ public/images/products (เหมือนกับใน Products.js)
-  const getProductImage = (product) => {
-    if (product.model) {
-      // ใช้รหัสสินค้า (model) เป็นชื่อไฟล์รูป .jpg
-      return `/images/products/${product.model}.jpg`;
-    }
-    return '/images/NoImage.png'; // รูปภาพเริ่มต้นถ้าไม่มี model
-  };
+        const getProductImage = (product) => {
+          if (product.model) return `/images/products/${product.model}.jpg`;
+          return '/images/NoImage.png';
+        };
 
-  return (
-    <div className="content-section">
-      <h2>รายการโปรด</h2>
+        return (
+          <div className="content-section">
+            <h2>รายการโปรด</h2>
+            <div className="favorites-grid">
+              {favorites.length > 0 ? (
+                favorites.map((favorite, index) => {
+                  const p = favorite.product || {};
+                  const productId = p.id ?? p.product_id ?? favorite.product_id;
+                  const imgUrl = getProductImage(p);
+                  const price = Number(p.price ?? 0).toLocaleString('th-TH', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  });
 
-      <div className="favorites-grid">
-        {favorites.length > 0 ? (
-          favorites.map((favorite, index) => {
-            const p = favorite.product || {};
-            const productId = p.id ?? p.product_id ?? favorite.product_id;
-
-            // ใช้ฟังก์ชัน getProductImage เพื่อให้รูปตรงกับสินค้า
-            const imgUrl = getProductImage(p);
-
-            const price = Number(p.price ?? 0).toLocaleString('th-TH', {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
-            });
-
-            return (
-              <div
-                key={index}
-                className="favorite-card"
-                role="button"
-                tabIndex={0}
-                onClick={() => navigate(`/product/${productId}`)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') navigate(`/product/${productId}`);
-                }}
-              >
-                <div className="favorite-thumb">
-                  <img src={imgUrl} alt={p.name || 'product'} />
+                  return (
+                    <div
+                      key={index}
+                      className="favorite-card"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => navigate(`/product/${productId}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') navigate(`/product/${productId}`);
+                      }}
+                    >
+                      <div className="favorite-thumb">
+                        <img src={imgUrl} alt={p.name || 'product'} />
+                      </div>
+                      <div className="favorite-info">
+                        <div className="favorite-title">{p.name || 'ไม่ระบุชื่อสินค้า'}</div>
+                        {p.model && <div className="favorite-code">{p.model}</div>}
+                        <div className="favorite-price">{price} ฿ THB</div>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="empty-state">
+                  <p>ยังไม่มีรายการโปรด</p>
                 </div>
-
-                <div className="favorite-info">
-                  <div className="favorite-title">{p.name || 'ไม่ระบุชื่อสินค้า'}</div>
-                  {p.model && <div className="favorite-code">{p.model}</div>}
-
-                  <div className="favorite-price">
-                    {price} ฿ THB
-                  </div>
-                </div>
-              </div>
-            );
-          })
-        ) : (
-          <div className="empty-state">
-            <p>ยังไม่มีรายการโปรด</p>
+              )}
+            </div>
           </div>
-        )}
-      </div>
-    </div>
-  );
-
+        );
 
       default:
         return null;
@@ -791,194 +733,58 @@ const Profile = () => {
     return (
       <div className="profile-page">
         <div className="profile-container">
+          {/* sidebar + skeleton simplified */}
           <div className="profile-sidebar">
             <div className="user-info">
-              <div className="user-avatar">
-                <i className="fas fa-user"></i>
-              </div>
+              <div className="user-avatar"><i className="fas fa-user"></i></div>
               <h3>ก้องภพ สัตบุษ</h3>
             </div>
-            
             <nav className="profile-nav">
-              <button 
-                className={`nav-item ${activeTab === 'personal' ? 'active' : ''}`}
-                onClick={() => setActiveTab('personal')}
-              >
-                ข้อมูลส่วนตัว
-              </button>
-              <button 
-                className={`nav-item ${activeTab === 'address' ? 'active' : ''}`}
-                onClick={() => setActiveTab('address')}
-              >
-                ที่อยู่ของฉัน
-              </button>
-              <button 
-                className={`nav-item ${activeTab === 'orders' ? 'active' : ''}`}
-                onClick={() => setActiveTab('orders')}
-              >
-                คำสั่งซื้อ
-              </button>
-              <button 
-                className={`nav-item ${activeTab === 'favorites' ? 'active' : ''}`}
-                onClick={() => setActiveTab('favorites')}
-              >
-                รายการโปรด
-              </button>
+              <button className={`nav-item ${activeTab === 'personal' ? 'active' : ''}`} onClick={() => setActiveTab('personal')}>ข้อมูลส่วนตัว</button>
+              <button className={`nav-item ${activeTab === 'address' ? 'active' : ''}`} onClick={() => setActiveTab('address')}>ที่อยู่ของฉัน</button>
+              <button className={`nav-item ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>คำสั่งซื้อ</button>
+              <button className={`nav-item ${activeTab === 'favorites' ? 'active' : ''}`} onClick={() => setActiveTab('favorites')}>รายการโปรด</button>
             </nav>
-            
             <div className="sidebar-actions">
               {activeTab === 'personal' && (
-                <button 
-                  className="btn-edit"
-                  onClick={() => setIsEditing(!isEditing)}
-                >
+                <button className="btn-edit" onClick={() => setIsEditing(!isEditing)}>
                   {isEditing ? 'ยกเลิก' : 'แก้ไข'}
                 </button>
               )}
-              <button 
-                className="btn-logout"
-                onClick={handleLogout}
-              >
-                ออกจากระบบ
-              </button>
+              <button className="btn-logout" onClick={handleLogout}>ออกจากระบบ</button>
             </div>
           </div>
-
-          <div className="profile-main">
-            {renderContent()}
-          </div>
+          <div className="profile-main">{renderContent()}</div>
         </div>
       </div>
     );
   }
 
-  // ยังไม่ล็อกอิน: แสดงหน้าโปรไฟล์ด้วยข้อมูล mock
-  if (!hasToken) {
+  if (!hasToken || !user) {
     return (
       <div className="profile-page">
         <div className="profile-container">
           <div className="profile-sidebar">
             <div className="user-info">
-              <div className="user-avatar">
-                <i className="fas fa-user"></i>
-              </div>
+              <div className="user-avatar"><i className="fas fa-user"></i></div>
               <h3>ก้องภพ สัตบุษ</h3>
             </div>
-            
             <nav className="profile-nav">
-              <button 
-                className={`nav-item ${activeTab === 'personal' ? 'active' : ''}`}
-                onClick={() => setActiveTab('personal')}
-              >
-                ข้อมูลส่วนตัว
-              </button>
-              <button 
-                className={`nav-item ${activeTab === 'address' ? 'active' : ''}`}
-                onClick={() => setActiveTab('address')}
-              >
-                ที่อยู่ของฉัน
-              </button>
-              <button 
-                className={`nav-item ${activeTab === 'orders' ? 'active' : ''}`}
-                onClick={() => setActiveTab('orders')}
-              >
-                คำสั่งซื้อ
-              </button>
-              <button 
-                className={`nav-item ${activeTab === 'favorites' ? 'active' : ''}`}
-                onClick={() => setActiveTab('favorites')}
-              >
-                รายการโปรด
-              </button>
+              <button className={`nav-item ${activeTab === 'personal' ? 'active' : ''}`} onClick={() => setActiveTab('personal')}>ข้อมูลส่วนตัว</button>
+              <button className={`nav-item ${activeTab === 'address' ? 'active' : ''}`} onClick={() => setActiveTab('address')}>ที่อยู่ของฉัน</button>
+              <button className={`nav-item ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>คำสั่งซื้อ</button>
+              <button className={`nav-item ${activeTab === 'favorites' ? 'active' : ''}`} onClick={() => setActiveTab('favorites')}>รายการโปรด</button>
             </nav>
-            
             <div className="sidebar-actions">
               {activeTab === 'personal' && (
-                <button 
-                  className="btn-edit"
-                  onClick={() => setIsEditing(!isEditing)}
-                >
+                <button className="btn-edit" onClick={() => setIsEditing(!isEditing)}>
                   {isEditing ? 'ยกเลิก' : 'แก้ไข'}
                 </button>
               )}
-              <button 
-                className="btn-logout"
-                onClick={handleLogout}
-              >
-                ออกจากระบบ
-              </button>
+              <button className="btn-logout" onClick={handleLogout}>ออกจากระบบ</button>
             </div>
           </div>
-
-          <div className="profile-main">
-            {renderContent()}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ถ้า user เป็น null ให้แสดงหน้า Profile ด้วยข้อมูล mock
-  if (!user) {
-    return (
-      <div className="profile-page">
-        <div className="profile-container">
-          <div className="profile-sidebar">
-            <div className="user-info">
-              <div className="user-avatar">
-                <i className="fas fa-user"></i>
-              </div>
-              <h3>ก้องภพ สัตบุษ</h3>
-            </div>
-            
-            <nav className="profile-nav">
-              <button 
-                className={`nav-item ${activeTab === 'personal' ? 'active' : ''}`}
-                onClick={() => setActiveTab('personal')}
-              >
-                ข้อมูลส่วนตัว
-              </button>
-              <button 
-                className={`nav-item ${activeTab === 'address' ? 'active' : ''}`}
-                onClick={() => setActiveTab('address')}
-              >
-                ที่อยู่ของฉัน
-              </button>
-              <button 
-                className={`nav-item ${activeTab === 'orders' ? 'active' : ''}`}
-                onClick={() => setActiveTab('orders')}
-              >
-                คำสั่งซื้อ
-              </button>
-              <button 
-                className={`nav-item ${activeTab === 'favorites' ? 'active' : ''}`}
-                onClick={() => setActiveTab('favorites')}
-              >
-                รายการโปรด
-              </button>
-            </nav>
-            
-            <div className="sidebar-actions">
-              {activeTab === 'personal' && (
-                <button 
-                  className="btn-edit"
-                  onClick={() => setIsEditing(!isEditing)}
-                >
-                  {isEditing ? 'ยกเลิก' : 'แก้ไข'}
-                </button>
-              )}
-              <button 
-                className="btn-logout"
-                onClick={handleLogout}
-              >
-                ออกจากระบบ
-              </button>
-            </div>
-          </div>
-
-          <div className="profile-main">
-            {renderContent()}
-          </div>
+          <div className="profile-main">{renderContent()}</div>
         </div>
       </div>
     );
@@ -989,60 +795,25 @@ const Profile = () => {
       <div className="profile-container">
         <div className="profile-sidebar">
           <div className="user-info">
-            <div className="user-avatar">
-              <i className="fas fa-user"></i>
-            </div>
+            <div className="user-avatar"><i className="fas fa-user"></i></div>
             <h3>{user?.name || 'ไม่ระบุชื่อ'}</h3>
           </div>
-          
           <nav className="profile-nav">
-            <button 
-              className={`nav-item ${activeTab === 'personal' ? 'active' : ''}`}
-              onClick={() => setActiveTab('personal')}
-            >
-              ข้อมูลส่วนตัว
-            </button>
-            <button 
-              className={`nav-item ${activeTab === 'address' ? 'active' : ''}`}
-              onClick={() => setActiveTab('address')}
-            >
-              ที่อยู่ของฉัน
-            </button>
-            <button 
-              className={`nav-item ${activeTab === 'orders' ? 'active' : ''}`}
-              onClick={() => setActiveTab('orders')}
-            >
-              คำสั่งซื้อ
-            </button>
-            <button 
-              className={`nav-item ${activeTab === 'favorites' ? 'active' : ''}`}
-              onClick={() => setActiveTab('favorites')}
-            >
-              รายการโปรด
-            </button>
+            <button className={`nav-item ${activeTab === 'personal' ? 'active' : ''}`} onClick={() => setActiveTab('personal')}>ข้อมูลส่วนตัว</button>
+            <button className={`nav-item ${activeTab === 'address' ? 'active' : ''}`} onClick={() => setActiveTab('address')}>ที่อยู่ของฉัน</button>
+            <button className={`nav-item ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>คำสั่งซื้อ</button>
+            <button className={`nav-item ${activeTab === 'favorites' ? 'active' : ''}`} onClick={() => setActiveTab('favorites')}>รายการโปรด</button>
           </nav>
-          
           <div className="sidebar-actions">
             {activeTab === 'personal' && (
-              <button 
-                className="btn-edit"
-                onClick={() => setIsEditing(!isEditing)}
-              >
+              <button className="btn-edit" onClick={() => setIsEditing(!isEditing)}>
                 {isEditing ? 'ยกเลิก' : 'แก้ไข'}
               </button>
             )}
-            <button 
-              className="btn-logout"
-              onClick={handleLogout}
-            >
-              ออกจากระบบ
-            </button>
+            <button className="btn-logout" onClick={handleLogout}>ออกจากระบบ</button>
           </div>
         </div>
-
-        <div className="profile-main">
-          {renderContent()}
-        </div>
+        <div className="profile-main">{renderContent()}</div>
       </div>
     </div>
   );

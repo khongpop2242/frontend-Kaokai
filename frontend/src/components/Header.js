@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import API_URL from '../config/api';
 import './Header.css';
 
 const Header = () => {
@@ -10,7 +11,7 @@ const Header = () => {
   const [userRole, setUserRole] = useState('');
   const debounceRef = useRef(null);
   const navigate = useNavigate();
-  const [navOpen, setNavOpen] = useState(false);        // ← เพิ่ม
+  const [navOpen, setNavOpen] = useState(false);        
   const closeNav = () => setNavOpen(false);
 
   // ฟังก์ชันสำหรับอัพเดทจำนวนสินค้าในตะกร้า
@@ -21,7 +22,7 @@ const Header = () => {
       return;
     }
 
-    fetch('http://localhost:5050/api/cart', {
+    fetch(`${API_URL}/api/cart`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -70,7 +71,7 @@ const Header = () => {
     }
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`http://localhost:5050/api/search?q=${encodeURIComponent(searchQuery)}`);
+        const res = await fetch(`${API_URL}/api/search?q=${encodeURIComponent(searchQuery)}`);
         const data = await res.json();
         setSuggestions(Array.isArray(data) ? data : []);
         setShowSuggest(true);
@@ -115,7 +116,7 @@ const Header = () => {
       if (!token) return;
 
       try {
-        const response = await fetch('http://localhost:5050/api/auth/me', {
+        const response = await fetch(`${API_URL}/api/auth/me`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (response.ok) {
@@ -146,17 +147,17 @@ const Header = () => {
 
             <div className="search-bar" onBlur={() => setTimeout(() => setShowSuggest(false), 150)}>
               <form onSubmit={handleSearch} autoComplete="off">
-                <input
-                  type="text"
-                  placeholder="ค้นหา ..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => suggestions.length && setShowSuggest(true)}
-                />
-                <button type="submit">
-                  <i className="fas fa-search"></i>
-                </button>
-              </form>
+  <input
+    type="text"
+    placeholder="ค้นหา ..."
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+    onFocus={() => suggestions.length && setShowSuggest(true)}
+  />
+  <button type="submit" aria-label="ค้นหา">
+    <img src="/search.png" alt="" className="search-icon-img" />
+  </button>
+</form>
               {showSuggest && suggestions.length > 0 && (
                 <ul className="search-suggestions">
                   {suggestions.map((s) => (
@@ -177,10 +178,12 @@ const Header = () => {
               </a>
 
               {/* Phone pill */}
-              <a href="tel:0963891916" className="pill pill-red" aria-label="โทรศัพท์ 0963891916">
-                <i className="fas fa-phone pill-ic" aria-hidden="true" />
-                <span>0963891916</span>
-              </a>
+<a href="tel:0963891916" className="pill pill-red" aria-label="โทรศัพท์ 0963891916">
+  <img src="/images/phone_white.png" alt="" className="pill-phone-icon" />
+  <span>0963891916</span>
+</a>
+
+
 
               <Link to="/contact" className="pill pill-gray">CONTACT</Link>
             </div>

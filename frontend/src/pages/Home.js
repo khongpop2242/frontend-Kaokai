@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../config/api';
 import './Home.css';
 
 const Home = () => {
@@ -10,7 +11,7 @@ const Home = () => {
   useEffect(() => {
     const fetchBestSellers = async () => {
       try {
-        const response = await axios.get('http://localhost:5050/api/products/bestsellers');
+        const response = await axios.get(`${API_URL}/api/products/bestsellers`);
         setBestSellers(response.data);
       } catch (error) {
         console.error('Error fetching best sellers:', error);

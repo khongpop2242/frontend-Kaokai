@@ -1,20 +1,8 @@
 import React from "react";
 import "./About.css";
 
-
 const About = () => {
-  const productFiles = [
-    "KEL-039.jpg",
-    "KEL-077.jpg",
-    "KEL-109.jpg",
-    "KEL-110.jpg",
-    "KEL-111.jpg",
-    "KEL-112.jpg",
-    "KEL-130.jpg",
-    "KEL-152.jpg",
-  ];
   return (
-    
     <div className="about-page">
       {/* HERO */}
       <section

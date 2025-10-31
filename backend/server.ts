@@ -1983,6 +1983,30 @@ app.get('/api/admin/orders/:id', authMiddleware, adminMiddleware, async (req: an
   }
 });
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Furniture KaoKai API',
+    status: 'online',
+    version: '1.3.1',
+    endpoints: {
+      health: '/api/health',
+      products: '/api/products',
+      bestsellers: '/api/products/bestsellers',
+      cart: '/api/cart',
+      orders: '/api/orders',
+      promotions: '/api/promotions',
+      contact: '/api/contact',
+      auth: {
+        register: '/api/auth/register',
+        login: '/api/auth/login',
+        forgotPassword: '/api/auth/forgot-password',
+        resetPassword: '/api/auth/reset-password'
+      }
+    }
+  });
+});
+
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error(err.stack);
@@ -1992,7 +2016,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
-// 404 handler
+// 404 handler - ต้องอยู่ท้ายสุดหลังทุก routes
 app.use('*', (req, res) => {
   res.status(404).json({ message: 'ไม่พบ API endpoint ที่ต้องการ' });
 });

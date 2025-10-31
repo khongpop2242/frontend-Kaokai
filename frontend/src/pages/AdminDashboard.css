@@ -1085,3 +1085,93 @@
   .orders-table th:nth-child(2), .orders-table td:nth-child(2) { width: 210px; }
 }
 
+
+
+/* ===== PRODUCTS: ทำปุ่มการจัดการให้สั้น (ไอคอนพอดีมือ) ===== */
+.products-table td:last-child {
+  width: 140px;                    /* ช่องการจัดการเล็กลงพอดีกรอบ */
+}
+
+.products-table td:last-child .action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+/* ปุ่มให้เป็นขนาดคงที่ ไม่ยืดเป็นแท่งยาว */
+.products-table td:last-child .action-buttons .btn {
+  display: inline-flex !important;  /* กัน style อื่นบังคับให้ยืด */
+  align-items: center;
+  justify-content: center;
+  width: 38px !important;
+  height: 38px !important;
+  padding: 0 !important;
+  min-width: 0 !important;          /* ไม่บังคับความกว้างขั้นต่ำ */
+  border-radius: 10px;
+}
+
+/* ไอคอนไม่ต้องมีช่องว่างรอบข้าง */
+.products-table td:last-child .action-buttons .btn i {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* ให้ความสูงแถวเท่ากัน ดูแน่นขึ้นเล็กน้อย */
+.products-table td,
+.products-table th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  vertical-align: middle;
+}
+
+/* ถ้าจอแคบมาก ๆ ยังพอดีกรอบ */
+@media (max-width: 1280px) {
+  .products-table td:last-child { width: 120px; }
+  .products-table td:last-child .action-buttons .btn {
+    width: 34px !important; height: 34px !important;
+  }
+}
+
+/* ===== ORDERS: ย่อความกว้างคอลัมน์ "การจัดการ" และทำปุ่มให้สั้น ===== */
+
+/* ย่อคอลัมน์สุดท้าย (การจัดการ) */
+.orders-table th:nth-child(6),
+.orders-table td:nth-child(6) {
+  width: 96px !important;           /* เดิม ~120px */
+  text-align: center;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+/* ปุ่มให้เป็นไอคอนสั้น ๆ ไม่ยืดเป็นแถบยาว */
+.orders-table td:nth-child(6) .btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  min-width: 0 !important;
+  border-radius: 10px;
+}
+
+/* ไอคอนในปุ่มไม่ต้องมีระยะเพิ่ม */
+.orders-table td:nth-child(6) .btn i {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* จอแคบ ย่ออีกนิดให้ยังพอดีกรอบ */
+@media (max-width: 1280px) {
+  .orders-table th:nth-child(6),
+  .orders-table td:nth-child(6) { width: 84px !important; }
+
+  .orders-table td:nth-child(6) .btn {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
