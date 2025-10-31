@@ -82,9 +82,9 @@
 }
 
 .nav-item.active {
-  color: #dc3545;
+  color: #C00101;
   background: #fff5f5;
-  border-left: 3px solid #dc3545;
+  border-left: 3px solid #C00101;
   padding-left: 13px;
 }
 
@@ -96,7 +96,7 @@
 }
 
 .btn-edit {
-  background: #dc3545;
+  background: #C00101;
   color: white;
   border: none;
   padding: 10px 16px;
@@ -112,7 +112,7 @@
 }
 
 .btn-logout {
-  background: #dc3545;
+  background: #C00101;
   color: white;
   border: none;
   padding: 10px 16px;
@@ -142,7 +142,7 @@
   font-weight: 600;
   margin-bottom: 25px;
   padding-bottom: 10px;
-  border-bottom: 2px solid #dc3545;
+  border-bottom: 2px solid #C00101;
 }
 
 /* Form Styles */
@@ -190,7 +190,7 @@
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #dc3545;
+  border-color: #C00101;
 }
 
 .form-actions {
@@ -200,7 +200,7 @@
 }
 
 .btn-save {
-  background: #dc3545;
+  background: #C00101;
   color: white;
   border: none;
   padding: 12px 24px;
@@ -481,7 +481,7 @@
 }
 
 .btn-view-details {
-  background: #dc3545;
+  background: #C00101;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -516,7 +516,7 @@
 
 .province-input:focus {
   outline: none;
-  border-color: #dc3545;
+  border-color: #C00101;
 }
 
 .province-dropdown-list {
@@ -833,4 +833,182 @@
   }
   .order-info h4 { font-size: 16px; }
   .order-info p { font-size: 13px; }
+}
+
+
+
+/* ===== Orders: Table look (เหมือนภาพตัวอย่าง) ===== */
+.orders-table {
+  width: 100%;
+  border: 1px solid #eef2f6;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* header */
+.orders-head {
+  display: grid;
+  grid-template-columns: 1.6fr 0.9fr 0.9fr 0.8fr 0.8fr;
+  gap: 0;
+  background: #fafbff;
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: .2px;
+  border-bottom: 1px solid #eef2f6;
+}
+.orders-head .col {
+  padding: 16px 20px;
+}
+
+/* row */
+.orders-row {
+  display: grid;
+  grid-template-columns: 1.6fr 0.9fr 0.9fr 0.8fr 0.8fr;
+  gap: 0;
+  align-items: center;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fff;
+  transition: background .15s ease;
+}
+.orders-row:last-child { border-bottom: none; }
+
+.orders-row:hover {
+  background: #fcfcff;
+}
+
+.orders-row .col {
+  padding: 18px 20px;
+  font-size: 14px;
+  color: #111827;
+}
+
+/* left cell: title + sub */
+.order-title {
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 4px;
+}
+.order-sub {
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* date/amount alignment */
+.col-date, .col-amount { color: #0f172a; }
+
+/* action link (สไตล์เหมือน "Edit order") */
+.link-action {
+  background: none;
+  border: none;
+  color: #C00101;            /* ม่วงสุภาพคล้ายในตัวอย่าง */
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline transparent;
+  text-underline-offset: 2px;
+  transition: color .15s ease, text-decoration-color .15s ease;
+}
+.link-action:hover {
+  color: #d10101;
+  text-decoration-color: #d10101;
+}
+
+/* status badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid;
+  letter-spacing: .2px;
+}
+
+/* สีสถานะ */
+.status-badge.is-completed,
+.status-badge.is-paid {
+  color: #0f5132;
+  background: #d1fae5;
+  border-color: #a7f3d0;
+}
+.status-badge.is-shipped {
+  color: #0c4a6e;
+  background: #e0f2fe;
+  border-color: #bae6fd;
+}
+.status-badge.is-cancelled {
+  color: #7f1d1d;
+  background: #fee2e2;
+  border-color: #fecaca;
+}
+.status-badge.is-pending {
+  color: #8a6d00;
+  background: #fff7cc;
+  border-color: #ffe58f;
+}
+
+/* empty state */
+.orders-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: #64748b;
+  font-size: 16px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 900px) {
+  .orders-head,
+  .orders-row {
+    grid-template-columns: 1.4fr 1fr 1fr .8fr .9fr;
+  }
+}
+
+@media (max-width: 720px) {
+  /* สลับเป็นสองบรรทัดแต่ยังดูเป็นตาราง */
+  .orders-head { display: none; }
+  .orders-row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "order status"
+      "date amount"
+      "action action";
+    row-gap: 8px;
+    padding: 12px 0;
+  }
+  .orders-row .col { padding: 8px 16px; }
+
+  .col-order   { grid-area: order; }
+  .col-status  { grid-area: status; justify-self: end; }
+  .col-date    { grid-area: date;  color:#64748b; }
+  .col-amount  { grid-area: amount; justify-self: end; }
+  .col-action  { grid-area: action; padding-top: 4px; }
+  .link-action { width: 100%; text-align: left; }
+}
+
+/* ==== Avatar: black circle + white user icon ==== */
+.profile-sidebar .user-avatar,
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  aspect-ratio: 1 / 1;          /* กันยืดเป็นวงรี */
+  border-radius: 50%;
+  background: #000 !important;  /* ดำทึบ */
+  background-image: none !important; /* กัน gradient เก่า */
+  color: #fff !important;        /* สีไอคอน */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;                    /* กันวงรีเพราะ padding */
+  box-shadow: none;
+}
+
+/* ขนาดไอคอนข้างใน */
+.profile-sidebar .user-avatar i,
+.user-avatar i {
+  color: #fff !important;
+  font-size: 22px;               /* ปรับได้ตามชอบ */
+  line-height: 1;
 }

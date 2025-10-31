@@ -132,3 +132,22 @@
 @media (max-width: 900px){
   .company-photo{ height: 240px; }
 }
+
+/* ลิสต์เบอร์ (คงแบบบรรทัดเดิมได้) */
+.phone-list { list-style: none; padding: 0; margin: 8px 0 0; }
+.phone-list li { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
+.phone-list a { color: #111; text-decoration: none; }
+.phone-list a:hover { text-decoration: underline; }
+
+/* ไอคอนแบบรูปภาพ */
+.phone-icon-img{
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: inline-block;
+  flex: 0 0 22px;       /* กัน layout กระโดด */
+  /* ถ้าอยากให้สีดูซอฟต์ลงนิดหน่อย */
+  filter: grayscale(10%);
+}
+
+/* ลบกฎ .phone-icon เดิมได้ (ถ้ามี) */

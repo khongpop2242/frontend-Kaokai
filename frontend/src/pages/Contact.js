@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../config/api';
 import './Contact.css';
 
 export default function Contact() {
-  const phones = ["096-399-1916", "096-389-1916", "02-123-4567", "02-987-6543"];
+  const phones = ["096-389-1916", "098-129-9913", "02-123-4567", "02-987-6543"];
   const [form, setForm] = useState({
     name: '', email: '', phone: '', subject: '', message: ''
   });
@@ -13,7 +14,7 @@ export default function Contact() {
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5050/api/contact', form);
+      const res = await axios.post('API_BASE_URL/api/contact', form);
       if (res.data?.success) {
         alert('ส่งข้อความเรียบร้อยแล้ว');
         setForm({ name: '', email: '', phone: '', subject: '', message: '' });
@@ -35,22 +36,26 @@ export default function Contact() {
 
           <div className="company-text">
             <p><strong>บริษัท ก้าวไกลเฟอร์นิเจอร์ จำกัด</strong></p>
-            <p>ข้อมูลแนะนำบริษัท</p>
-            <p>บรรทัด 1</p>
-            <p>บรรทัด 2</p>
-            <p>บรรทัด 3</p>
+            <p>เป็นผู้จัดจำหน่ายและผลิตเฟอร์นิเจอร์สำนักงานคุณภาพสูงครบวงจร</p>
+            <p>มุ่งเน้นดีไซน์ทันสมัยและฟังก์ชันการใช้งานที่ตอบโจทย์ทุกธุรกิจ</p>
+            <p>เราพร้อมให้บริการออกแบบ ติดตั้ง และจัดส่งทั่วประเทศด้วยทีมงานมืออาชีพ</p>
           </div>
 
           <h3 className="contactinfo-title">Contact info</h3>
           <ul className="phone-list" aria-label="เบอร์โทรติดต่อ">
-  {phones.map((p) => (
-    <li key={p}>
-      {/* ใช้ไอคอนโทรศัพท์ (เปลี่ยนเป็น Font Awesome ได้) */}
-      <span className="phone-icon" aria-hidden="true">☎</span>
-      <a href={`tel:${p.replace(/[^0-9+]/g, '')}`}>{p}</a>
-    </li>
-  ))}
-</ul>
+            {phones.map((p) => (
+              <li key={p}>
+                {/* รูปไอคอนโทรศัพท์จาก public/images/phone.png */}
+                <img
+                  className="phone-icon-img"
+                  src={`${process.env.PUBLIC_URL}/images/phone.png`}
+                  alt=""
+                  aria-hidden="true"
+                />
+                <a href={`tel:${p.replace(/[^0-9+]/g, '')}`}>{p}</a>
+              </li>
+            ))}
+          </ul>
         </section>
 
         {/* RIGHT */}
@@ -100,14 +105,14 @@ export default function Contact() {
       </div>
 
       {/* COMPANY PHOTO BAR */}
-<div
-  className="company-photo"
-  role="img"
-  aria-label="รูปบริษัท (หน้าร้าน)"
-  style={{
-    backgroundImage: `url(${process.env.PUBLIC_URL}/images/BG001.jpg)`
-  }}
-/>
+      <div
+        className="company-photo"
+        role="img"
+        aria-label="รูปบริษัท (หน้าร้าน)"
+        style={{
+          backgroundImage: `url(${process.env.PUBLIC_URL}/images/BG001.jpg)`
+        }}
+      />
 
     </div>
   );
